@@ -17,11 +17,11 @@ exports.load = async function (page) {
 };
 
 exports.load_events = async function (page) {
-    let events = [];
     const html = await page.$eval(node, el => el.outerHTML);
     const sport_tree = await page.evaluate(() => {
         return reactData.liveMenuEvents.childs
     });
+    let events = [];
 
     const expand_btns = await page.$$(expand_event_btns);
     for (const cur_btn of expand_btns) {
