@@ -2,6 +2,9 @@ class CondBet:
     cond = 0.0
     v1, v2 = 0.0, 0.0
 
+    def is_not_empty(self):
+        return self.v1 != 0 and self.v2 != 0
+
 
 class Bets:
     part = 0
@@ -13,6 +16,17 @@ class Event:
     team1, team2 = "", ""
     parts = []
 
+    def is_not_empty(self):
+        return len(self.parts) != 0
+
 
 class Sports:
     soccer, tennis, hockey, basket, volley = (Event() for i in range(5))
+
+
+class Bookmakers:
+    fonbet, olimp, marat = (Sports() for i in range(3))
+
+
+class Teams:
+    team1, team2 = "", ""
