@@ -3,9 +3,7 @@ python:
   - "3.6"
 before_install:
   - cd ./handling
-#  - pip install codecov
 script:
   - pytest --cov=handling
 after_success:
-#  - codecov --token=98c1d7ba-04ce-4fd7-b487-9e8938227ef6
   - bash <(curl -s https://codecov.io/bash) -t 98c1d7ba-04ce-4fd7-b487-9e8938227ef6
