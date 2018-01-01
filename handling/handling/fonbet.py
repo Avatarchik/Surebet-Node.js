@@ -1,6 +1,7 @@
 import lxml.html
-from bets import *
-from parsing import *
+
+from .bets import *
+from .parsing import *
 
 table = '//body/table[@id="lineTable"]/tbody'
 ev_name = '//td[contains(@class, "eventCellName")]/div[contains(@id, "event")]'
@@ -34,6 +35,7 @@ def parse(source):
     }
 
     rows_info = []
+    prev_sport = None
     for row_node in row_nodes:
         row_classes = row_node.get('class').split(" ")
         if len(row_classes) == 1:
@@ -64,13 +66,18 @@ def append_event(rows_info, sport):
         append_not_empty(sport, parse_event(rows_info))
 
 
+def parse_teams(name):
+    sep = '—'
+    teams = name.split(sep)
+    if len(teams) != 2 or sep not in name:
+        raise ParseException('event name\'s struct has changed')
+    return teams
+
+
 def parse_event(rows_info):
     node = rows_info[0].node
     name, is_blocked = get_event_info(node)
-
-    teams = name.split('-')
-    if len(teams) != 2 or '-' not in name:
-        ParseException('event name\'s struct has changed')
+    teams = parse_teams(name)
 
     parts = []
     part_handled = is_blocked
@@ -79,11 +86,13 @@ def parse_event(rows_info):
         bets.part = 0
         parts.append(bets)
 
-    for row_info in range(rows_info[1:]):
-        ev_class, node = row_info
+    for row_info in rows_info[1:]:
+        ev_class, node = row_info.ev_class, row_info.node
+
         if ev_class == tr_event_details:
             if part_handled:
                 parse_event_details(parts[-1], node)
+
         elif ev_class == tr_event_child:
             name, is_blocked = get_event_info(node)
 
@@ -107,11 +116,12 @@ def is_part(name):
 
 def get_event_info(row_node):
     title = xpath_with_check(row_node, "." + ev_name)
-    name = xpath_with_check(row_node, './/text()')
+    name_node = xpath_with_check(title[0], './/text()')
 
+    name = name_node[1].strip()
     is_blocked = title[0].get('class') == 'eventBlocked'
 
-    return name.strip(), is_blocked
+    return name, is_blocked
 
 
 def parse_event_details(bets, node):
@@ -125,7 +135,8 @@ def parse_event_details(bets, node):
     }
 
     for grid_node in grid_nodes:
-        caption = xpath_with_check(grid_node, './/thead/tr[1]/th/text()').strip()
+        caption_node = xpath_with_check(grid_node, './/thead/tr[1]/th/text()')
+        caption = caption_node[0].strip()
 
         if caption not in allowed_bets.keys():
             continue
@@ -149,9 +160,9 @@ def handle_row(row_node):
     col_nodes = xpath_with_check(row_node, './/td')
 
     for idx, bet in enumerate(['o1', 'ox', 'o2', 'o1x', 'o12', 'ox2']):
-        text_node = xpath_text(col_nodes[idx + 3])
-        if len(text_node) > 0:
-            bets.__setattr__(bet, float(text_node[0].text))
+        text = col_nodes[idx + 3].text
+        if text:
+            bets.__setattr__(bet, parse_factor(text))
 
     hand = handle_cond_bet(col_nodes[9:13], hand_ids)
     append_not_empty(bets.hand, hand)
@@ -165,17 +176,14 @@ def handle_row(row_node):
 def handle_cond_bet(nodes, ids):
     factors = []
     for id in ids:
-        res = xpath_text(nodes[id])
-
-        if len(res) > 1:
-            ParseException('structure has changed: cond bet')
-        if len(res) == 1:
-            factors.append(float(res[0].text))
+        text = nodes[id].text
+        if text:
+            factors.append(parse_factor(text))
 
     if not factors:
         return None
 
     if len(factors) != 3:
-        ParseException('structure has changed: cond bet')
+        raise ParseException('structure has changed: cond bet')
 
     return CondBet(*factors)
