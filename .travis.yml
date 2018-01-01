@@ -2,8 +2,9 @@ language: python
 python:
   - "3.6"
 before_install:
-  - cd ./handling/handling
+# Do not move from this dir. requirements.txt is here
+  - cd ./handling
 script:
-  - pytest --cov=./ ./tests/
+  - pytest --cov=handling handling/tests
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t 98c1d7ba-04ce-4fd7-b487-9e8938227ef6
