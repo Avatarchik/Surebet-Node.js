@@ -1,10 +1,10 @@
 import lxml.html
 
-from handling import *
+from . import *
 from .bets import *
 from .parsing import *
 
-table = '//body/table[@id="lineTable"]/tbody'
+table_rows = '//body/table[@id="lineTable"]/tbody/tr'
 ev_name = './/td[contains(@class, "eventCellName")]/div[contains(@id, "event")]'
 grid = './/div[@class="detailsDIV"]/table'
 
@@ -24,7 +24,7 @@ class RowInfo:
 
 def parse(source):
     html = lxml.html.fromstring(source)
-    row_nodes = xpath_with_check(html, table + '/tr')
+    row_nodes = xpath_with_check(html, table_rows)
 
     bookmaker = Bookmaker()
     sports = {
@@ -67,18 +67,10 @@ def append_event(rows_info, sport):
         sport.append(parse_event(rows_info))
 
 
-def parse_teams(name):
-    sep = '—'
-    teams = name.split(sep)
-    if len(teams) != 2 or sep not in name:
-        raise StructureException('event name')
-    return teams
-
-
 def parse_event(rows_info):
     node = rows_info[0].node
     name, is_not_blocked = get_event_info(node)
-    teams = parse_teams(name)
+    teams = parse_teams(name, '—')
 
     parts = []
     bets = None

@@ -16,3 +16,10 @@ def xpath_with_check(node, xpath):
     if not res:
         raise ParseException('node not found, xpath: {}'.format(xpath))
     return res
+
+
+def parse_teams(name, sep):
+    teams = name.split(sep)
+    if len(teams) != 2 or sep not in name:
+        raise StructureException('event name')
+    return teams
