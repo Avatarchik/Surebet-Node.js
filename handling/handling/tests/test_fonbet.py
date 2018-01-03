@@ -32,7 +32,6 @@ def test_known_result():
         html = file.read()
 
     fonbet = parse(html)
-    fonbet.del_empty()
     fonbet.format()
 
     assert obj_to_json(fonbet) == json_dumps(known_res)
