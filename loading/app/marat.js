@@ -23,9 +23,9 @@ exports.load = async function (page) {
 };
 
 async function click_fav_sports(page) {
-    for (let curSport of sports) {
-        let sel = util.format(sport_star, curSport);
-        let node = await page.$(sel);
+    for (const curSport of sports) {
+        const sel = util.format(sport_star, curSport);
+        const node = await page.$(sel);
         if (node !== null) {
             await node.click().then(() => page.waitForNavigation({waitUntil: 'networkidle'}));
         }
