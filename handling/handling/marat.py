@@ -164,18 +164,18 @@ def handle_details(details, teams):
 
 
 def get_handler_type(detail_name):
+    handler_type = None
     if "Total" in detail_name or "Handicap" in detail_name:
         excluded_names = ("Result", "Asian", "Sets")
-        found_excluded = False
         for name in excluded_names:
             if name in detail_name:
-                found_excluded = True
-        if not found_excluded:
-            return 1
+                break
+        else:
+            handler_type = 1
     elif "Result" in detail_name and contain_part_name(detail_name) \
             or detail_name == "Result" or detail_name == "Normal Time Result":
-        return 0
-    return None
+        handler_type = 0
+    return handler_type
 
 
 def contain_part_name(string):
