@@ -128,20 +128,22 @@ def parse_event(event_doc, event_info):
 
 
 def get_block_type(sport_name, block_name):
+    block_type = None
     for name in ("Main", "Handicap", "Total"):
         if name in block_name:
-            return 0
-
-    part_name = {
-        "soccer": "Half",
-        "basket": "Quarter",
-        "hockey": "Period",
-        "volley": "Set",
-        "tennis": "Set",
-    }[sport_name]
-    if part_name in block_name:
-        return 1
-    return None
+            block_type = 0
+            break
+    else:
+        part_name = {
+            "soccer": "Half",
+            "basket": "Quarter",
+            "hockey": "Period",
+            "volley": "Set",
+            "tennis": "Set",
+        }[sport_name]
+        if part_name in block_name:
+            block_type = 1
+    return block_type
 
 
 def handle_details(details, teams):
@@ -221,7 +223,7 @@ def cond_bet_handler(detail, cond_bet_type):
     columns = [[], []]
     for row_node in xpath_with_check(detail, xp_detail_rows):
         row_header = row_node.xpath("./th[1]/div")
-        if len(row_header) > 0:
+        if row_header:
             if get_text(row_header[0]) == "Odd":  # if odd/even header occurred
                 break
             continue
@@ -289,7 +291,7 @@ def handle_closed_events(events):
             bet_node = xpath_with_check(event, xp_win_bet.format(cur_bet + 1))[0]
             if factor_not_blocked(bet_node):
                 win_bets.append(get_factor(bet_node))
-        if not len(win_bets):
+        if not win_bets:
             continue
         if len(win_bets) == 1:
             raise ParseException("found only one win bet in closed events")
