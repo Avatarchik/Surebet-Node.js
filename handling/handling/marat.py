@@ -38,7 +38,7 @@ def get_text(elem):
     return elem.text.strip()
 
 
-def is_not_blocked(elem):
+def factor_not_blocked(elem):
     return elem.get("class") != "igrey"
 
 
@@ -166,10 +166,12 @@ def handle_details(details, teams):
 def get_handler_type(detail_name):
     if "Total" in detail_name or "Handicap" in detail_name:
         excluded_names = ("Result", "Asian", "Sets")
+        found_excluded = False
         for name in excluded_names:
             if name in detail_name:
-                return None
-        return 1
+                found_excluded = True
+        if not found_excluded:
+            return 1
     elif "Result" in detail_name and contain_part_name(detail_name) \
             or detail_name == "Result" or detail_name == "Normal Time Result":
         return 0
@@ -200,7 +202,7 @@ def result_bets_handler(detail, teams):
         bet_name = get_result_bet_name(row_name, teams)
 
         factor_node = xpath_with_check(row_node, "./td/div[2]/span")[0]
-        if is_not_blocked(factor_node):
+        if factor_not_blocked(factor_node):
             yield bet_name, get_factor(factor_node)
 
 
@@ -229,7 +231,7 @@ def cond_bet_handler(detail, cond_bet_type):
             cond = get_cond(get_text(cond_node))
 
             factor_node = xpath_with_check(row_node, xp_row_factor.format(cur_col + 1))[0]
-            if is_not_blocked(factor_node):
+            if factor_not_blocked(factor_node):
                 columns[cur_col].append((cond, get_factor(factor_node)))
 
     cond_bets = []
@@ -285,7 +287,7 @@ def handle_closed_events(events):
         win_bets = []
         for cur_bet in range(2):
             bet_node = xpath_with_check(event, xp_win_bet.format(cur_bet + 1))[0]
-            if is_not_blocked(bet_node):
+            if factor_not_blocked(bet_node):
                 win_bets.append(get_factor(bet_node))
         if not len(win_bets):
             continue
