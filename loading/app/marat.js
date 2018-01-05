@@ -50,16 +50,23 @@ exports.load_events = async (page) => {
         await page.waitForNavigation({waitUntil: 'networkidle', networkIdleTimeout: 50});
 
         try {
-            await page.waitForSelector(event_details, {timeout: 3000});
-            const event = await page.$eval(event_details, el => el.outerHTML);
-            events.push(event);
-
-            await page.evaluateHandle(e => e.click(), cur_btn);
-        } catch (err) {
-            console.log(`timeout waiting for 'event_details'`)
+            await page.waitForSelector(event_details, {visible: true, timeout: 3000});
         }
+        catch (err) {
+            const site = require(__filename);
+            const content = await page.content();
+            await loading.save_html(site, content);
+            await page.screenshot({path: exports.name + '.png'});
+            await loading.save_json(events);
+            console.log('timeout: waiting for selector');
+            return null;
+        }
+        const event = await page.$eval(event_details, el => el.outerHTML);
+        events.push(event);
+
+        await page.evaluateHandle(e => e.click(), cur_btn);
     }
 
     loading.events_loaded(exports.name);
-    return {events: events, html: html, sport_tree: sport_tree}
+    return {events: events, html: html, sport_tree: sport_tree};
 };

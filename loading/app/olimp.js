@@ -27,7 +27,7 @@ exports.load_events = async (page) => {
     await page.waitForSelector(node);
     await page.waitForNavigation({waitUntil: 'networkidle'});
 
-    const html = loading.node_html(page, node);
+    const html = await loading.node_html(page, node);
 
     // await page.screenshot({path: exports.name + '.png'});
 

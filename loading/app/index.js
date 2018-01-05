@@ -18,8 +18,8 @@ load_site = async (load_func) => {
 };
 
 (async () => {
-    await load_site(testing.test_olimp);
     await load_site(testing.test_marat);
+    await load_site(testing.test_olimp);
     await load_site(testing.test_posit);
     await load_site(testing.test_fonbet);
 })();

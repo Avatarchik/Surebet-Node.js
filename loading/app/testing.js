@@ -1,11 +1,4 @@
-const fs = require('fs');
-
-async function save_html(site, html) {
-    await fs.writeFile(site.name + '.html', html, (err) => {
-        if (err) throw err;
-    });
-    console.log('HTML has been saved!');
-}
+const loading = require('./loading');
 
 function check_res(res) {
     const size = res.length;
@@ -23,7 +16,7 @@ async function test_events_html(page, site, test_num) {
 
         const html = await site.load_events(page);
         check_res(html);
-        await save_html(site, html);
+        await loading.save_html(site, html);
     }
 }
 
@@ -59,7 +52,10 @@ exports.test_marat = async (page) => {
         console.log(`test: ${i + 1}`);
 
         const res = await site.load_events(page);
-        const events = res.events;
-        check_res(JSON.stringify(events));
+        if (res == null) {
+            return
+        }
+        check_res(JSON.stringify(res.events));
+        await loading.save_json(site, res.events)
     }
 };
