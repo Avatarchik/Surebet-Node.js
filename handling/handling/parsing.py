@@ -1,3 +1,6 @@
+from re import search
+
+
 class ParseException(Exception):
     pass
 
@@ -23,3 +26,11 @@ def parse_teams(name, sep):
     if len(teams) != 2 or sep not in name:
         raise StructureException('event name')
     return teams
+
+
+def contain_part(string, parts, pattern='{}'):
+    for part in parts:
+        part_pattern = pattern.format(part)
+        if search(part_pattern, string):
+            return True
+    return False

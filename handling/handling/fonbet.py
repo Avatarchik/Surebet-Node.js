@@ -4,7 +4,7 @@ from . import *
 from .bets import *
 from .parsing import *
 
-table_rows = '//body/table[@id="lineTable"]/tbody/tr'
+table_rows = '//table[@id="lineTable"]/tbody/tr'
 ev_name = './/td[contains(@class, "eventCellName")]/div[contains(@id, "event")]'
 grid = './/div[@class="detailsDIV"]/table'
 
@@ -93,7 +93,7 @@ def parse_event(rows_info):
             name, is_not_blocked = get_event_info(node)
 
             bets = None
-            if is_not_blocked and is_part(name):
+            if is_not_blocked and contain_part(name, ('half', 'quarter', 'set', 'period')):
                 bets = handle_row(node)
                 part_num = int(name[0])
                 bets.part = part_num
@@ -102,13 +102,6 @@ def parse_event(rows_info):
         parts.append(bets)
 
     return Event(*teams, parts)
-
-
-def is_part(name):
-    for part_name in ['half', 'quarter', 'set', 'period']:
-        if part_name in name:
-            return True
-    return False
 
 
 def get_event_info(row_node):

@@ -1,5 +1,4 @@
 from lxml import html
-from re import search
 
 from handling import *
 from .bets import *
@@ -174,18 +173,14 @@ def get_handler_type(detail_name):
                 break
         else:
             handler_type = 1
-    elif "Result" in detail_name and contain_part_name(detail_name) \
+    elif "Result" in detail_name and _contain_part(detail_name) \
             or detail_name == "Result" or detail_name == "Normal Time Result":
         handler_type = 0
     return handler_type
 
 
-def contain_part_name(string):
-    for part_name in ("Quarter", "Half", "Set", "Period"):
-        part_pattern = "\d.. {}".format(part_name)
-        if search(part_pattern, string) is not None:
-            return True
-    return False
+def _contain_part(string):
+    return contain_part(string, ("Quarter", "Half", "Set", "Period"), '\d.. {}')
 
 
 def get_cond_bet_type(detail_name, teams):
