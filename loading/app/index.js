@@ -1,29 +1,25 @@
 const puppeteer = require('puppeteer');
-const fs = require('fs');
-const site = require('./fonbet');
+const testing = require('./testing');
 
-// const login = 'lester0578@gmail.com';
-// const pass = '1q1w1e1r';
-
-(async () => {
+load_site = async (load_func) => {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true
-        // headless: false,
     });
 
-    for (let i = 0; i < 5; i++) {
-        const page = await browser.newPage();
-        console.log("start");
+    console.log("Start");
 
-        await site.load(page);
-        const html = await site.load_events(page);
+    const page = await browser.newPage();
 
-        await fs.writeFile(site.name + '.html', html, (err) => {
-            if (err) throw err;
-            console.log('HTML has been saved!');
-        });
-        await page.close();
-    }
+    await load_func(page);
+
+    console.log("Done");
 
     await browser.close();
+};
+
+(async () => {
+    await load_site(testing.test_olimp);
+    await load_site(testing.test_marat);
+    await load_site(testing.test_posit);
+    await load_site(testing.test_fonbet);
 })();

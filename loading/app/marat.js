@@ -1,3 +1,4 @@
+const loading = require('./loading');
 const util = require("util");
 
 const url = "https://www.marathonbet.co.uk/en/live";
@@ -12,14 +13,15 @@ const event_details = `div > table > tbody > tr[class*="market-details"]`;
 
 exports.name = 'marat';
 
-exports.load = async function (page) {
+exports.load = async (page) => {
     await page.goto(url);
     await page.waitForNavigation({waitUntil: 'networkidle'});
 
     await click_fav_sports(page);
-    await page.click(fav_btn).then(() => page.waitForNavigation({waitUntil: 'networkidle'}));
+    await page.click(fav_btn);
+    await page.waitForNavigation({waitUntil: 'networkidle'});
 
-    console.log(`${exports.name}: loaded`);
+    loading.site_loaded(exports.name)
 };
 
 async function click_fav_sports(page) {
@@ -27,12 +29,13 @@ async function click_fav_sports(page) {
         const sel = util.format(sport_star, curSport);
         const node = await page.$(sel);
         if (node !== null) {
-            await node.click().then(() => page.waitForNavigation({waitUntil: 'networkidle'}));
+            await node.click();
+            await page.waitForNavigation({waitUntil: 'networkidle'});
         }
     }
 }
 
-exports.load_events = async function (page) {
+exports.load_events = async (page) => {
     await click_fav_sports(page);
 
     const html = await page.$eval(node, el => el.outerHTML);
@@ -43,8 +46,8 @@ exports.load_events = async function (page) {
 
     const expand_btns = await page.$$(expand_event_btns);
     for (const cur_btn of expand_btns) {
-        await page.evaluateHandle(e => e.click(), cur_btn)
-            .then(() => page.waitForNavigation({waitUntil: 'networkidle', networkIdleTimeout: 50}));
+        await page.evaluateHandle(e => e.click(), cur_btn);
+        await page.waitForNavigation({waitUntil: 'networkidle', networkIdleTimeout: 50});
 
         try {
             await page.waitForSelector(event_details, {timeout: 3000});
@@ -57,6 +60,6 @@ exports.load_events = async function (page) {
         }
     }
 
-    console.log(`${exports.name}: loaded events`);
+    loading.events_loaded(exports.name);
     return {events: events, html: html, sport_tree: sport_tree}
 };

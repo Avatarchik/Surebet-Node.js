@@ -1,3 +1,5 @@
+const loading = require('./loading');
+
 const url = 'https://olimp.com?action=setlang&id=2';
 const node = '#champ_container_ > table > tbody';
 
@@ -7,23 +9,28 @@ const next = '#submitLiveMatches > td > input:nth-child(5)';
 
 exports.name = 'olimp';
 
-exports.load = async function (page) {
+exports.load = async (page) => {
     await page.goto(url);
-    console.log("goto");
+    await page.waitForNavigation({waitUntil: 'networkidle'});
+
+    loading.site_loaded(exports.name)
 };
 
-exports.load_events = async function (page) {
+exports.load_events = async (page) => {
     await page.click(live);
-    console.log("live");
-    await page.waitForNavigation();
-    console.log("waitForNav");
-    await page.click(select_all);
-    console.log("select all");
-    await page.click(next);
-    console.log("next");
-    await page.waitForNavigation();
-    console.log("waitForNav");
 
-    await page.screenshot({path: exports.name + '.png'});
-    return page.$eval(node, e => e.outerHTML);
+    await page.waitForSelector(select_all);
+    await page.click(select_all);
+
+    await page.click(next);
+
+    await page.waitForSelector(node);
+    await page.waitForNavigation({waitUntil: 'networkidle'});
+
+    const html = loading.node_html(page, node);
+
+    // await page.screenshot({path: exports.name + '.png'});
+
+    loading.events_loaded(exports.name);
+    return html;
 };
